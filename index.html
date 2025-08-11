@@ -5,8 +5,26 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Countdown Timer</title>
 
-  <!-- Use relative paths (no leading /) -->
+  <!-- Relative path to CSS -->
   <link rel="stylesheet" href="assets/countdown.css">
+
+  <style>
+    /* Override accent colors for Planet Fitness branding */
+    .pf-countdown-panel {
+      border-top: 6px solid #5F259F; /* PF purple stripe */
+    }
+    .pf-countdown-digits {
+      background: #5F259F; /* PF purple background for digits */
+      color: #FFDE00; /* PF yellow numbers */
+      border-color: #5F259F;
+    }
+    .pf-countdown-label {
+      color: #5F259F; /* PF purple labels */
+    }
+    .pf-countdown-sep {
+      color: #5F259F; /* PF purple separators */
+    }
+  </style>
 </head>
 <body style="margin:0; padding:40px 0; background:#fff;">
 
@@ -21,7 +39,7 @@
     data-link="false">
   </div>
 
-  <!-- Script last; relative path -->
+  <!-- JS last; relative path -->
   <script src="assets/countdown.js" defer></script>
 </body>
 </html>
