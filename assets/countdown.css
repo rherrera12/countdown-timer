@@ -1,126 +1,145 @@
-/* Responsive, overflow-safe countdown (light/dark capable) */
+/* Conventional, even countdown: equal boxes, tabular digits, 2×2 mobile grid */
 
-.pf-countdown-wrap {
+:root{
+  --bg: #ffffff;
+  --text: #111827;
+  --muted: #6b7280;
+  --panel: #ffffff;
+  --ring: #e5e7eb;
+  --shadow: 0 10px 30px rgba(0,0,0,.08);
+
+  /* sizing */
+  --maxw: 760px;      /* panel max width */
+  --gap: 16px;        /* gap between boxes/seps */
+  --radius: 18px;
+  --unit-min: 140px;  /* min width of a unit on desktop */
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
   font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial;
+  color: var(--text);
+  display: grid;
+  place-items: start center;
+  padding: 40px 12px;
+}
+
+.cd {
+  width: 100%;
+  max-width: var(--maxw);
   display: grid;
   gap: 10px;
   justify-items: center;
   text-align: center;
+}
+
+.headline {
+  margin: 0;
+  font-weight: 800;
+  font-size: clamp(22px, 3.6vw, 28px);
+  line-height: 1.1;
+}
+
+.sub {
+  margin: 0;
+  color: var(--muted);
+  font-weight: 600;
+  font-size: clamp(12px, 2.6vw, 14px);
+}
+
+.panel {
   width: 100%;
+  background: var(--panel);
+  border: 1px solid var(--ring);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: clamp(14px, 2vw, 20px);
 }
 
-/* Panel scales fluidly; cap width for desktop polish */
-.pf-countdown-panel {
-  background: #ffffff;              /* base; theme can override */
-  color: #111827;
-  border-radius: 20px;
-  padding: 18px 22px;
-  border: 1px solid #e5e7eb;
-  box-shadow: 0 10px 30px rgba(0,0,0,.08);
+/* Equal-width layout: 4 equal columns with separators not affecting widths */
+.units {
   display: grid;
-  gap: 12px;
-  justify-items: center;
-
-  /* Fluid width with a reasonable cap */
-  width: min(720px, 94vw);
+  grid-template-columns: repeat(7, 1fr); /* unit, sep, unit, sep, unit, sep, unit */
+  align-items: end;
+  gap: var(--gap);
 }
 
-/* Timer row */
-.pf-countdown-timer {
+/* Make the separators occupy minimal space but keep grid symmetry */
+.sep {
+  display: grid;
+  place-items: center;
+  color: var(--muted);
+  font-weight: 800;
+  font-size: clamp(26px, 3.2vw, 40px);
+  line-height: 1;
+}
+
+/* Each time unit: force equal width boxes */
+.unit {
+  display: grid;
+  grid-template-rows: auto auto;
+  gap: 8px;
+  min-width: var(--unit-min);
+}
+
+/* The number box: equal height across all units using aspect-ratio */
+.value {
   display: grid;
   grid-auto-flow: column;
-  gap: clamp(8px, 2.2vw, 16px);
-  align-items: end;
-}
+  align-items: center;
+  justify-content: center;
+  gap: clamp(6px, 1.2vw, 10px);
 
-/* Each time unit */
-.pf-countdown-slot {
-  display: grid;
-  gap: 6px;
-  justify-items: center;
-  min-width: clamp(80px, 22vw, 150px);
-}
-
-/* The number boxes */
-.pf-countdown-digits {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: clamp(6px, 1.5vw, 10px);
-  padding: clamp(10px, 1.8vw, 16px);
-  background: #f3f4f6;
+  background: #0f172a;
+  color: #ffffff;
+  border: 1px solid var(--ring);
   border-radius: 14px;
-  border: 1px solid #e5e7eb;
-  font-weight: 800;
+  box-shadow: inset 0 -6px 18px rgba(0,0,0,.06);
+
+  /* make all boxes identical height regardless of content */
+  aspect-ratio: 5 / 3; /* common banner ratio */
+  padding-inline: clamp(10px, 2.5vw, 16px);
+
+  /* NUMBERS: tabular to stop jittering */
+  font-variant-numeric: tabular-nums lining-nums;
   font-feature-settings: "tnum" 1, "lnum" 1;
 
-  /* Responsive font size; shrinks on small screens */
-  font-size: clamp(24px, 7.5vw, 48px);
-
-  box-shadow: inset 0 -6px 18px rgba(0,0,0,.06);
+  /* fluid font size with safe caps */
+  font-size: clamp(26px, 4.0vw, 44px);
+  font-weight: 800;
 }
 
-/* Labels under boxes */
-.pf-countdown-label {
-  color: #6b7280;
-  font-size: clamp(10px, 2.5vw, 12px);
+/* the digits themselves */
+.value > span {
+  line-height: 1;
+  display: inline-block;
+}
+
+/* Labels under boxes: small, consistent */
+.label {
+  color: var(--muted);
+  font-size: clamp(10px, 1.8vw, 12px);
   letter-spacing: .12em;
   text-transform: uppercase;
   font-weight: 700;
 }
 
-/* Colons */
-.pf-countdown-sep {
-  align-self: center;
-  color: #6b7280;
-  font-size: clamp(24px, 7.2vw, 42px);
-  font-weight: 800;
-  padding: 0 4px 8px;
+/* Phones: switch to 2×2 grid, hide separators */
+@media (max-width: 640px) {
+  .units {
+    grid-template-columns: 1fr 1fr;
+    grid-auto-rows: auto;
+  }
+  .sep { display: none; }
+  .unit { min-width: 0; }
+  .value { aspect-ratio: 7 / 3; font-size: clamp(22px, 8vw, 36px); }
 }
 
-/* Light/Dark theme toggles */
-.pf-countdown--light .pf-countdown-panel { background:#fff; color:#111827; }
-.pf-countdown--light .pf-countdown-digits { background:#f3f4f6; border-color:#e5e7eb; }
-.pf-countdown--light .pf-countdown-label { color:#6b7280; }
-.pf-countdown--light .pf-countdown-sep { color:#6b7280; }
-
-.pf-countdown--dark .pf-countdown-panel { background:#0f172a; color:#fff; border-color: rgba(255,255,255,.08); }
-.pf-countdown--dark .pf-countdown-digits { background:#0b1220; border-color: rgba(255,255,255,.1); color:#fff; }
-.pf-countdown--dark .pf-countdown-label { color:#94a3b8; }
-.pf-countdown--dark .pf-countdown-sep { color:#9ca3af; }
-
-/* Medium screens: if it gets tight, reduce fonts a bit */
-@media (max-width: 700px) {
-  .pf-countdown-digits { font-size: clamp(22px, 7vw, 42px); }
-  .pf-countdown-slot { min-width: clamp(76px, 23vw, 130px); }
-}
-
-/* Mobile: stack vertically; hide separators */
-@media (max-width: 560px) {
-  .pf-countdown-timer { grid-auto-flow: row; }
-  .pf-countdown-sep { display: none; }
-  .pf-countdown-slot { min-width: 100%; }
-  .pf-countdown-digits { grid-template-columns: repeat(2, 1fr); font-size: clamp(22px, 8vw, 36px); }
-}
-
-/* Tight modes (added/removed by JS via ResizeObserver) */
-.pf-tight .pf-countdown-digits {
-  font-size: clamp(20px, 7vw, 32px);
-  padding: clamp(8px, 1.4vw, 12px);
-}
-.pf-tight .pf-countdown-slot { min-width: clamp(68px, 20vw, 120px); }
-
-.pf-x-tight .pf-countdown-digits {
-  font-size: clamp(18px, 6.5vw, 28px);
-  padding: clamp(6px, 1.2vw, 10px);
-}
-.pf-x-tight .pf-countdown-slot { min-width: clamp(60px, 18vw, 110px); }
-.pf-x-tight .pf-countdown-label,
-.pf-x-tight .pf-countdown-sep { display: none; }
-
-/* Flip micro-animation on value change */
-.pf-flip { animation: pfFlip .45s ease; }
-@keyframes pfFlip {
-  0% { transform: rotateX(0) }
-  50% { transform: rotateX(10deg) scale(1.02) }
-  100% { transform: rotateX(0) }
+/* Very small screens: single column if needed */
+@media (max-width: 360px) {
+  .units { grid-template-columns: 1fr; }
+  .value { aspect-ratio: 8 / 3; }
 }
