@@ -3,43 +3,94 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Countdown Timer</title>
-
-  <!-- Relative path to CSS -->
-  <link rel="stylesheet" href="assets/countdown.css">
-
+  <title>Countdown Timer – Self Test</title>
   <style>
-    /* Override accent colors for Planet Fitness branding */
-    .pf-countdown-panel {
-      border-top: 6px solid #5F259F; /* PF purple stripe */
-    }
-    .pf-countdown-digits {
-      background: #5F259F; /* PF purple background for digits */
-      color: #FFDE00; /* PF yellow numbers */
-      border-color: #5F259F;
-    }
-    .pf-countdown-label {
-      color: #5F259F; /* PF purple labels */
-    }
-    .pf-countdown-sep {
-      color: #5F259F; /* PF purple separators */
-    }
+    /* Minimal inline style (light theme for white background) */
+    .pf-countdown-wrap { font-family: system-ui,-apple-system,Segoe UI,Roboto,Arial; display:grid; gap:10px; justify-items:center; text-align:center; }
+    .pf-countdown-panel { background:#fff; color:#111827; border-radius:20px; padding:18px 22px; border:1px solid #e5e7eb; box-shadow:0 10px 30px rgba(0,0,0,.08); display:grid; gap:12px; justify-items:center; width:600px; }
+    .pf-countdown-timer { display:grid; grid-auto-flow:column; gap:12px; align-items:end; }
+    .pf-countdown-slot { display:grid; gap:6px; justify-items:center; min-width:120px; }
+    .pf-countdown-digits { display:grid; grid-template-columns:repeat(2,1fr); gap:8px; padding:12px 16px; background:#f3f4f6; border-radius:14px; border:1px solid #e5e7eb; font-weight:800; font-feature-settings:"tnum" 1,"lnum" 1; font-size:48px; box-shadow:inset 0 -6px 18px rgba(0,0,0,.06); }
+    .pf-countdown-label { color:#6b7280; font-size:12px; letter-spacing:.12em; text-transform:uppercase; font-weight:700; }
+    .pf-countdown-sep { align-self:center; color:#6b7280; font-size:42px; font-weight:800; padding:0 4px 8px; }
+    .pf-flip { animation: pfFlip .45s ease; } @keyframes pfFlip { 0%{transform:rotateX(0)}50%{transform:rotateX(10deg) scale(1.02)}100%{transform:rotateX(0)} }
   </style>
 </head>
 <body style="margin:0; padding:40px 0; background:#fff;">
-
-  <!-- Countdown -->
   <div
-    data-countdown="pf"
+    id="countdown-root"
     data-end="2025-08-31T23:59:59-04:00"
-    data-theme="light"
     data-headline="Offer Ends Soon!"
     data-sub="Enrollment ends tonight"
-    data-width="600"
-    data-link="false">
-  </div>
+  ></div>
 
-  <!-- JS last; relative path -->
-  <script src="assets/countdown.js" defer></script>
+  <script>
+    (function () {
+      const root = document.getElementById('countdown-root');
+      const end = root.dataset.end;
+      const headline = root.dataset.headline || 'Offer Ends Soon!';
+      const sub = root.dataset.sub || '';
+      let endMs = Date.parse(end);
+
+      function buildSlot(label, id) {
+        const slot = document.createElement('div'); slot.className = 'pf-countdown-slot';
+        const digits = document.createElement('div'); digits.className='pf-countdown-digits'; digits.id=id;
+        digits.innerHTML = '<span>0</span><span>0</span>';
+        const lab = document.createElement('div'); lab.className='pf-countdown-label'; lab.textContent = label;
+        slot.appendChild(digits); slot.appendChild(lab); return slot;
+      }
+      function setDigits(el, val) {
+        const s = String(Math.max(0,Math.floor(val))).padStart(2,'0');
+        const spans = el.querySelectorAll('span');
+        if (spans[0].textContent !== s[0]) { spans[0].textContent = s[0]; el.classList.add('pf-flip'); }
+        if (spans[1].textContent !== s[1]) { spans[1].textContent = s[1]; el.classList.add('pf-flip'); }
+        setTimeout(()=>el.classList.remove('pf-flip'), 260);
+      }
+
+      const wrap = document.createElement('div'); wrap.className = 'pf-countdown-wrap';
+      const h = document.createElement('div'); h.style="font-weight:800;font-size:28px;"; h.textContent=headline;
+      const p = document.createElement('div'); p.style="color:#6b7280;font-weight:600"; p.textContent=sub;
+      const panel = document.createElement('div'); panel.className='pf-countdown-panel';
+
+      const timer = document.createElement('div'); timer.className='pf-countdown-timer';
+      const dd = buildSlot('DAYS','pf-dd');
+      const hh = buildSlot('HOURS','pf-hh');
+      const mm = buildSlot('MINUTES','pf-mm');
+      const ss = buildSlot('SECONDS','pf-ss');
+      function sep(){ const s=document.createElement('div'); s.className='pf-countdown-sep'; s.textContent=':'; return s; }
+      timer.appendChild(dd); timer.appendChild(sep());
+      timer.appendChild(hh); timer.appendChild(sep());
+      timer.appendChild(mm); timer.appendChild(sep());
+      timer.appendChild(ss);
+
+      if (headline) wrap.appendChild(h);
+      if (sub) wrap.appendChild(p);
+      panel.appendChild(timer);
+      wrap.appendChild(panel);
+      root.replaceWith(wrap);
+
+      const elDD = dd.querySelector('.pf-countdown-digits');
+      const elHH = hh.querySelector('.pf-countdown-digits');
+      const elMM = mm.querySelector('.pf-countdown-digits');
+      const elSS = ss.querySelector('.pf-countdown-digits');
+
+      function tick(){
+        const now = Date.now();
+        let diff = endMs - now;
+        if (diff <= 0) { setDigits(elDD,0); setDigits(elHH,0); setDigits(elMM,0); setDigits(elSS,0); return; }
+        const d = Math.floor(diff/86400000); diff -= d*86400000;
+        const h = Math.floor(diff/3600000);  diff -= h*3600000;
+        const m = Math.floor(diff/60000);    diff -= m*60000;
+        const s = Math.floor(diff/1000);
+        // expand days to 3 chars if needed
+        if (d > 99 && elDD.children.length === 2) elDD.innerHTML = '<span>0</span><span>0</span><span>0</span>';
+        const dayStr = String(d).padStart(elDD.children.length,'0');
+        [...elDD.children].forEach((sp,i)=>{ if (sp.textContent !== dayStr[i]) { sp.textContent=dayStr[i]; elDD.classList.add('pf-flip'); }});
+        setTimeout(()=>elDD.classList.remove('pf-flip'),260);
+        setDigits(elHH,h); setDigits(elMM,m); setDigits(elSS,s);
+      }
+      tick(); const iv = setInterval(()=>{ tick(); if(Date.now()>=endMs) clearInterval(iv); },1000);
+    })();
+  </script>
 </body>
 </html>
