@@ -1,4 +1,4 @@
-/* Responsive, email-banner style countdown (light/dark capable) */
+/* Responsive countdown (light/dark capable) */
 
 .pf-countdown-wrap {
   font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial;
@@ -11,7 +11,7 @@
 
 /* Panel scales fluidly; cap width for desktop polish */
 .pf-countdown-panel {
-  background: #ffffff;              /* light theme base (overridden by .pf-countdown--light/dark) */
+  background: #ffffff;              /* base; theme can override */
   color: #111827;
   border-radius: 20px;
   padding: 18px 22px;
@@ -29,7 +29,7 @@
 .pf-countdown-timer {
   display: grid;
   grid-auto-flow: column;
-  gap: clamp(8px, 2.2vw, 16px);
+  gap: 12px;
   align-items: end;
 }
 
@@ -38,7 +38,7 @@
   display: grid;
   gap: 6px;
   justify-items: center;
-  min-width: clamp(88px, 24vw, 140px);
+  min-width: 88px;
 }
 
 /* The number boxes */
@@ -46,20 +46,20 @@
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 8px;
-  padding: clamp(10px, 1.8vw, 16px);
+  padding: 12px 16px;
   background: #f3f4f6;
   border-radius: 14px;
   border: 1px solid #e5e7eb;
   font-weight: 800;
   font-feature-settings: "tnum" 1, "lnum" 1;
-  font-size: clamp(26px, 8vw, 48px);
+  font-size: 48px;
   box-shadow: inset 0 -6px 18px rgba(0,0,0,.06);
 }
 
 /* Labels under boxes */
 .pf-countdown-label {
   color: #6b7280;
-  font-size: clamp(10px, 2.5vw, 12px);
+  font-size: 12px;
   letter-spacing: .12em;
   text-transform: uppercase;
   font-weight: 700;
@@ -69,7 +69,7 @@
 .pf-countdown-sep {
   align-self: center;
   color: #6b7280;
-  font-size: clamp(24px, 8vw, 42px);
+  font-size: 42px;
   font-weight: 800;
   padding: 0 4px 8px;
 }
@@ -90,7 +90,7 @@
   .pf-countdown-timer { grid-auto-flow: row; }
   .pf-countdown-sep { display: none; }
   .pf-countdown-slot { min-width: 100%; }
-  .pf-countdown-digits { grid-template-columns: repeat(2, 1fr); }
+  .pf-countdown-digits { grid-template-columns: repeat(2, 1fr); font-size: 38px; }
 }
 
 /* Flip micro-animation on value change */
