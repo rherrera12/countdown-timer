@@ -1,9 +1,27 @@
-<div
-  data-countdown="pf"
-  data-end="2025-08-31T23:59:59-04:00"
-  data-theme="light" <!-- change from dark to light -->
-  data-headline="Offer Ends Soon!"
-  data-sub="Enrollment ends tonight"
-  data-width="600"
-  data-link="false"
-></div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Countdown Timer</title>
+
+  <!-- Use relative paths (no leading /) -->
+  <link rel="stylesheet" href="assets/countdown.css">
+</head>
+<body style="margin:0; padding:40px 0; background:#fff;">
+
+  <!-- Countdown -->
+  <div
+    data-countdown="pf"
+    data-end="2025-08-31T23:59:59-04:00"
+    data-theme="light"
+    data-headline="Offer Ends Soon!"
+    data-sub="Enrollment ends tonight"
+    data-width="600"
+    data-link="false">
+  </div>
+
+  <!-- Script last; relative path -->
+  <script src="assets/countdown.js" defer></script>
+</body>
+</html>
