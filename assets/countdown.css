@@ -126,4 +126,52 @@ body{
   pointer-events:none;
 }
 
-/
+/* Flip layers (animated) */
+.pf-top-flip, .pf-bottom-flip{
+  position:absolute; left:0; right:0; overflow:hidden;
+  backface-visibility:hidden;
+  width:100%;
+  color:#1f2937; background:#f3f4f6;
+  border:1px solid var(--panel-edge);
+  text-align:center; font-weight:900;
+  font-variant-numeric:tabular-nums lining-nums; font-feature-settings:"tnum" 1,"lnum" 1;
+  font-size:clamp(28px,4.4vw,54px);
+}
+.pf-top-flip{
+  top:0; height:1.4em; line-height:1.4em;
+  border-bottom:none; border-top-left-radius:14px; border-top-right-radius:14px;
+  box-shadow:inset 0 -6px 12px rgba(0,0,0,.06);
+  transform-origin:center bottom; transform:rotateX(0);
+  animation:pfFlipTop .32s ease-in forwards;
+}
+.pf-bottom-flip{
+  bottom:0; height:1.4em; line-height:1.4em;
+  border-top:1px solid rgba(0,0,0,.12); border-bottom-left-radius:14px; border-bottom-right-radius:14px;
+  box-shadow:inset 0 6px 12px rgba(0,0,0,.06);
+  transform-origin:center top; transform:rotateX(90deg);
+  animation:pfFlipBottom .32s ease-out .30s forwards;
+}
+
+@keyframes pfFlipTop{ to{ transform:rotateX(-90deg) } }
+@keyframes pfFlipBottom{ to{ transform:rotateX(0) } }
+
+/* Brand colors inside the digit face (PF purple bg, PF yellow numbers) */
+.pf-top, .pf-bottom, .pf-top-flip, .pf-bottom-flip{
+  background:#5F259F; color:#FFDE00; border-color:#5F259F;
+}
+
+/* Labels */
+.pf-label{
+  color:var(--muted);
+  font-size:12px; letter-spacing:.14em; text-transform:uppercase; font-weight:800;
+}
+
+/* 2×2 grid on phones; hide separators */
+@media (max-width: 760px){
+  .pf-units{ grid-template-columns:1fr 1fr; grid-auto-rows:auto; column-gap:14px; row-gap:16px; }
+  .pf-sep{ display:none; }
+  .pf-unit{ min-width:0; }
+}
+@media (max-width: 380px){
+  .pf-top,.pf-bottom,.pf-top-flip,.pf-bottom-flip{ font-size:clamp(24px,7.6vw,32px); }
+}
