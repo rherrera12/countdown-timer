@@ -1,372 +1,51 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Offer Ends Soon! Don't Miss Out!</title>
-<style>
-  :root{
-    /* Planet Fitness palette */
-    --pf-purple:#5F259F;
-    --pf-yellow:#FFDE00;
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Offer Ends Soon! Don’t Miss Out!</title>
 
-    /* Neutral surfaces that work on white, purple, or yellow pages */
-    --bg:#ffffff;
-    --text:#111827;
-    --muted:#6b7280;
-
-    --panel:#f8fafc;
-    --panel-edge:#e5e7eb;
-
-    /* Flip card theme */
-    --digit-bg:#ffffff;
-    --digit-face:#f3f4f6;
-    --digit-text:#1f2937;
-
-    --radius: 14px;
-    --shadow: 0 10px 30px rgba(0,0,0,.10);
-  }
-
-  /* If you embed over a purple or yellow section, add body classes: .on-purple / .on-yellow */
-  body.on-purple { --bg:#2a1650; --text:#ffffff; --muted:#d6cbe9; --panel:#1d1236; --panel-edge:rgba(255,255,255,.18); --digit-bg:#24173e; --digit-face:#2f214f; --digit-text:#fff; }
-  body.on-yellow { --bg:#fff7cc; --text:#111827; --muted:#5b6474; --panel:#fffaf0; --panel-edge:#eadfb1; --digit-bg:#fff6d6; --digit-face:#fff; --digit-text:#111827; }
-
-  /* Page baseline */
-  body{
-    margin:0; background:var(--bg); color:var(--text);
-    font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial;
-    display:grid; place-items:start center;
-    padding:40px 14px;
-  }
-
-  /* Wrapper */
-  .wrap{
-    width:100%;
-    max-width:920px;
-    display:grid; gap:12px; justify-items:center; text-align:center;
-  }
-
-  /* Headline */
-  .headline{
-    margin:0;
-    font-weight:900;
-    letter-spacing:.2px;
-    font-size:clamp(22px,3.6vw,32px);
-    line-height:1.08;
-  }
-  .kicker{
-    margin:0;
-    color:var(--muted);
-    font-weight:700;
-    font-size:clamp(12px,2.6vw,14px);
-    letter-spacing:.16em;
-    text-transform:uppercase;
-  }
-
-  /* Panel */
-  .panel{
-    width:100%;
-    background:var(--panel);
-    border:1px solid var(--panel-edge);
-    border-top:6px solid var(--pf-purple);
-    border-radius:18px;
-    box-shadow:var(--shadow);
-    padding:clamp(14px,2vw,20px);
-  }
-
-  /* Units row: unit, sep, unit, sep ... → equal spacing */
-  .units{
-    display:grid;
-    grid-template-columns: 1fr auto 1fr auto 1fr auto 1fr;
-    align-items:end;
-    gap:clamp(10px,2.4vw,18px);
-  }
-
-  /* Labels above each group */
-  .unit{
-    display:grid; gap:8px; justify-items:center;
-    min-width: 160px; /* equal-ish widths desktop */
-  }
-  .label{
-    color:var(--muted);
-    font-size:12px;
-    font-weight:800;
-    letter-spacing:.14em;
-    text-transform:uppercase;
-  }
-
-  /* Separator */
-  .sep{
-    display:grid; place-items:center;
-    font-weight:900;
-    color:var(--pf-purple);
-    font-size: clamp(26px,3.2vw,40px);
-    line-height:1;
-    padding:0 2px 10px;
-  }
-
-  /* Flip block (two halves) */
-  .flip{
-    perspective: 1200px;
-    display:grid;
-    grid-template-rows: 1fr 1fr;
-    width:100%;
-    max-width: 340px;
-    border-radius: var(--radius);
-    overflow: hidden;
-    box-shadow: inset 0 -6px 18px rgba(0,0,0,.06);
-    background: var(--digit-bg);
-    border: 1px solid var(--panel-edge);
-  }
-
-  .top, .bottom, .top-flip, .bottom-flip{
-    height: 1.4em;
-    line-height: 1.4em;
-    display:block;
-    width:100%;
-    text-align:center;
-    font-weight:900;
-    font-variant-numeric: tabular-nums lining-nums;
-    font-feature-settings: "tnum" 1, "lnum" 1;
-    font-size: clamp(28px, 4.4vw, 54px);
-    color: var(--digit-text);
-    background: var(--digit-face);
-    position: relative;
-  }
-
-  .top, .top-flip{
-    border-bottom: 1px solid rgba(0,0,0,.12);
-    box-shadow: inset 0 -6px 12px rgba(0,0,0,.07);
-  }
-  .bottom, .bottom-flip{
-    box-shadow: inset 0 6px 12px rgba(0,0,0,.07);
-  }
-
-  /* Split “cards” for each digit (00..59 etc.) */
-  .digits{
-    display:grid;
-    grid-auto-flow: column;
-    gap: clamp(6px, 1.4vw, 10px);
-    padding: clamp(8px, 1.8vw, 12px);
-    justify-content: center;
-  }
-
-  .digit{
-    min-width: 1.15em; /* keeps columns even */
-  }
-
-  /* Flip animations */
-  .top-flip,
-  .bottom-flip{
-    position:absolute; left:0; right:0; overflow:hidden;
-    backface-visibility:hidden;
-    transform-origin: center bottom;
-  }
-  .top-flip{
-    top:0; height:1.4em;
-    transform: rotateX(0);
-    animation: flipTop .35s ease-in forwards;
-  }
-  .bottom-flip{
-    bottom:0; height:1.4em; transform-origin:center top;
-    transform: rotateX(90deg);
-    animation: flipBottom .35s ease-out .33s forwards;
-  }
-
-  @keyframes flipTop{
-    0%{ transform: rotateX(0) }
-    100%{ transform: rotateX(-90deg) }
-  }
-  @keyframes flipBottom{
-    0%{ transform: rotateX(90deg) }
-    100%{ transform: rotateX(0) }
-  }
-
-  /* Mobile: two rows, no separators; tighter labels */
-  @media (max-width: 720px){
-    .units{
-      grid-template-columns: 1fr 1fr;
-      grid-auto-rows: auto;
-      column-gap: 14px;
-      row-gap: 16px;
-    }
-    .sep{ display:none; }
-    .unit{ min-width: 0; }
-  }
-
-  @media (max-width: 380px){
-    .top, .bottom, .top-flip, .bottom-flip{
-      font-size: clamp(24px, 7.6vw, 32px);
-    }
-  }
-</style>
+  <!-- Project-relative path (works on GitHub Pages project sites) -->
+  <link rel="stylesheet" href="assets/pf-countdown.css" />
 </head>
-<body class="">
-  <main class="wrap" aria-live="polite">
-    <h1 class="headline">Offer Ends Soon! Don’t Miss Out!</h1>
-    <p class="kicker">Time remaining</p>
+<body class=""> <!-- add on-purple or on-yellow here if embedding on dark/brand sections -->
 
-    <section class="panel">
-      <div class="units" id="units">
+  <main class="pf-wrap" aria-live="polite">
+    <h1 class="pf-headline">Offer Ends Soon! Don’t Miss Out!</h1>
+    <p class="pf-kicker">Time remaining</p>
+
+    <section class="pf-panel">
+      <div class="pf-units">
         <!-- Days -->
-        <div class="unit" aria-label="Days">
-          <div class="flip">
-            <div class="digits" id="d-digits">
-              <!-- digits injected -->
-            </div>
-          </div>
-          <div class="label">Days</div>
+        <div class="pf-unit" aria-label="Days">
+          <div class="pf-flip" id="pf-days"></div>
+          <div class="pf-label">Days</div>
         </div>
-        <div class="sep">:</div>
+        <div class="pf-sep">:</div>
 
         <!-- Hours -->
-        <div class="unit" aria-label="Hours">
-          <div class="flip">
-            <div class="digits" id="h-digits">
-              <div class="digit">
-                <div class="top">0</div>
-                <div class="bottom">0</div>
-              </div>
-              <div class="digit">
-                <div class="top">0</div>
-                <div class="bottom">0</div>
-              </div>
-            </div>
-          </div>
-          <div class="label">Hours</div>
+        <div class="pf-unit" aria-label="Hours">
+          <div class="pf-flip" id="pf-hours"></div>
+          <div class="pf-label">Hours</div>
         </div>
-        <div class="sep">:</div>
+        <div class="pf-sep">:</div>
 
         <!-- Minutes -->
-        <div class="unit" aria-label="Minutes">
-          <div class="flip">
-            <div class="digits" id="m-digits">
-              <div class="digit">
-                <div class="top">0</div>
-                <div class="bottom">0</div>
-              </div>
-              <div class="digit">
-                <div class="top">0</div>
-                <div class="bottom">0</div>
-              </div>
-            </div>
-          </div>
-          <div class="label">Minutes</div>
+        <div class="pf-unit" aria-label="Minutes">
+          <div class="pf-flip" id="pf-mins"></div>
+          <div class="pf-label">Minutes</div>
         </div>
-        <div class="sep">:</div>
+        <div class="pf-sep">:</div>
 
         <!-- Seconds -->
-        <div class="unit" aria-label="Seconds">
-          <div class="flip">
-            <div class="digits" id="s-digits">
-              <div class="digit">
-                <div class="top">0</div>
-                <div class="bottom">0</div>
-              </div>
-              <div class="digit">
-                <div class="top">0</div>
-                <div class="bottom">0</div>
-              </div>
-            </div>
-          </div>
-          <div class="label">Seconds</div>
+        <div class="pf-unit" aria-label="Seconds">
+          <div class="pf-flip" id="pf-secs"></div>
+          <div class="pf-label">Seconds</div>
         </div>
       </div>
     </section>
   </main>
 
-<script>
-(function(){
-  // Config:
-  // - default to 20 days from now; override by adding ?end=YYYY-MM-DDTHH:mm:ss-05:00 to the URL
-  var qs = new URLSearchParams(location.search);
-  var endParam = qs.get('end');
-  var endMs = endParam ? Date.parse(endParam) : (Date.now() + 20*86400000);
-  if (isNaN(endMs)) { var tmp = new Date(endParam); if (!isNaN(tmp)) endMs = tmp.getTime(); }
-
-  // Build DAYS digit containers dynamically (2 or 3 digits)
-  var dDigits = document.getElementById('d-digits');
-  function ensureDayPlaces(d){
-    var need = d > 99 ? 3 : 2;
-    while (dDigits.children.length < need) {
-      var digit = document.createElement('div');
-      digit.className = 'digit';
-      digit.innerHTML = '<div class="top">0</div><div class="bottom">0</div>';
-      dDigits.insertBefore(digit, dDigits.firstChild); // grow to the left
-    }
-    while (dDigits.children.length > need) dDigits.removeChild(dDigits.firstChild);
-  }
-
-  // Update helpers (flip animation per digit)
-  function flipTo(digitEl, newVal){
-    var top = digitEl.querySelector('.top');
-    var bottom = digitEl.querySelector('.bottom');
-    var curVal = top.textContent;
-
-    if (curVal === String(newVal)) return;
-
-    var topFlip = document.createElement('div');
-    topFlip.className = 'top-flip';
-    topFlip.textContent = curVal;
-
-    var bottomFlip = document.createElement('div');
-    bottomFlip.className = 'bottom-flip';
-    bottomFlip.textContent = newVal;
-
-    top.textContent = curVal;
-    bottom.textContent = newVal;
-
-    digitEl.appendChild(topFlip);
-    digitEl.appendChild(bottomFlip);
-
-    // Cleanup after animation
-    topFlip.addEventListener('animationend', function(){ top.textContent = newVal; topFlip.remove(); });
-    bottomFlip.addEventListener('animationend', function(){ bottom.textContent = newVal; bottomFlip.remove(); });
-  }
-
-  function setNumber(digitsRoot, value, places){
-    var str = String(value).padStart(places, '0');
-    for (var i = 0; i < places; i++){
-      flipTo(digitsRoot.children[i], str[i]);
-    }
-  }
-
-  // Init fixed HH, MM, SS places (2 each)
-  var hDigits = document.getElementById('h-digits');
-  var mDigits = document.getElementById('m-digits');
-  var sDigits = document.getElementById('s-digits');
-
-  function tick(){
-    var now = Date.now();
-    var diff = endMs - now;
-
-    if (diff <= 0){
-      ensureDayPlaces(0);
-      setNumber(dDigits, 0, dDigits.children.length);
-      setNumber(hDigits, 0, 2);
-      setNumber(mDigits, 0, 2);
-      setNumber(sDigits, 0, 2);
-      return;
-    }
-
-    var d = Math.floor(diff / 86400000); diff -= d * 86400000;
-    var h = Math.floor(diff / 3600000);  diff -= h * 3600000;
-    var m = Math.floor(diff / 60000);    diff -= m * 60000;
-    var s = Math.floor(diff / 1000);
-
-    ensureDayPlaces(d);
-    setNumber(dDigits, d, dDigits.children.length);
-    setNumber(hDigits, h, 2);
-    setNumber(mDigits, m, 2);
-    setNumber(sDigits, s, 2);
-  }
-
-  tick();
-  var iv = setInterval(function(){
-    tick();
-    if (Date.now() >= endMs) clearInterval(iv);
-  }, 1000);
-})();
-</script>
+  <script src="assets/pf-countdown.js" defer></script>
 </body>
 </html>
