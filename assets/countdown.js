@@ -1,5 +1,5 @@
 (function () {
-  // Left-pad to 2 chars without String.padStart (for older browsers)
+  // Left-pad to 2 chars without String.padStart (older browser safe)
   function lpad2(n) {
     var s = String(Math.max(0, Math.floor(n)));
     return s.length < 2 ? '0' + s : s;
@@ -20,6 +20,27 @@
     var lab = document.createElement('div'); lab.className = 'pf-countdown-label'; lab.textContent = label;
     slot.appendChild(digits); slot.appendChild(lab);
     return slot;
+  }
+
+  function initTightModes(panel, dd) {
+    if (!('ResizeObserver' in window)) return; // graceful degrade
+    var ro = new ResizeObserver(function(entries){
+      for (var i=0; i<entries.length; i++) {
+        var w = entries[i].contentRect.width;
+        var daysDigits = dd.children.length; // 2 or 3
+        // Tight mode triggers: very narrow panel OR 3-digit days on smaller panel
+        var tight = (w < 420) || (daysDigits > 2 && w < 520);
+        var xtight = (w < 340) || (daysDigits > 2 && w < 420);
+
+        panel.classList.toggle('pf-tight', tight && !xtight);
+        panel.classList.toggle('pf-x-tight', xtight);
+        if (!tight && !xtight) {
+          panel.classList.remove('pf-tight');
+          panel.classList.remove('pf-x-tight');
+        }
+      }
+    });
+    ro.observe(panel);
   }
 
   function initOne(root) {
@@ -99,6 +120,9 @@
     var elMM = mm.querySelector('.pf-countdown-digits');
     var elSS = ss.querySelector('.pf-countdown-digits');
 
+    // Auto tight modes (prevents overflow)
+    initTightModes(panel, elDD);
+
     function tick() {
       var now = Date.now();
       var diff = endMs - now;
@@ -111,4 +135,34 @@
       var d = Math.floor(diff / 86400000); diff -= d * 86400000;
       var h = Math.floor(diff / 3600000);  diff -= h * 3600000;
       var m = Math.floor(diff / 60000);    diff -= m * 60000;
-      var
+      var s = Math.floor(diff / 1000);
+
+      // Expand days to 3 digits if >99
+      if (d > 99 && elDD.children.length === 2) elDD.innerHTML = '<span>0</span><span>0</span><span>0</span>';
+
+      // Update day digits
+      var dayStr = String(d);
+      while (dayStr.length < elDD.children.length) dayStr = '0' + dayStr;
+      for (var i = 0; i < elDD.children.length; i++) {
+        var sp = elDD.children[i];
+        if (sp.textContent !== dayStr.charAt(i)) { sp.textContent = dayStr.charAt(i); elDD.classList.add('pf-flip'); }
+      }
+      setTimeout(function(){ elDD.classList.remove('pf-flip'); }, 260);
+
+      setDigits(elHH, h);
+      setDigits(elMM, m);
+      setDigits(elSS, s);
+    }
+
+    tick();
+    var iv = setInterval(function () {
+      tick();
+      if (Date.now() >= endMs) clearInterval(iv);
+    }, 1000);
+  }
+
+  document.addEventListener('DOMContentLoaded', function () {
+    var nodes = document.querySelectorAll('[data-countdown="pf"]');
+    for (var i = 0; i < nodes.length; i++) initOne(nodes[i]);
+  });
+})();
