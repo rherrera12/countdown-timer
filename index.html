@@ -1,59 +1,149 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<title>Countdown Timer</title>
-<style>
-  body {
-    text-align: center;
-    font-family: Arial, sans-serif;
-    background: #ffffff;
-    margin: 0;
-    padding: 0;
+// === File: package.json ===
+{
+  "name": "email-countdown-image",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "canvas": "^2.11.2"
   }
-  .timer {
-    font-size: 2em;
-    font-weight: bold;
-    color: #000000;
-    display: inline-block;
-    padding: 20px;
-    border: 2px solid #000;
-    border-radius: 10px;
-  }
-</style>
-</head>
-<body>
-
-<a href="https://yourclubwebsite.com" target="_blank">
-  <div class="timer" id="countdown"></div>
-</a>
-
-<script>
-// Set target date & time (adjust to your needs)
-const targetDate = new Date("2025-08-15T23:59:59").getTime();
-
-function updateCountdown() {
-  const now = new Date().getTime();
-  const distance = targetDate - now;
-
-  if (distance < 0) {
-    document.getElementById("countdown").innerHTML = "EXPIRED";
-    return;
-  }
-
-  const days = Math.floor(distance / (1000 * 60 * 60 * 24));
-  const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-  const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-  const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-
-  document.getElementById("countdown").innerHTML =
-    days + "d " + hours + "h " + minutes + "m " + seconds + "s";
 }
 
-// Update every second
-setInterval(updateCountdown, 1000);
-updateCountdown();
-</script>
+// === File: api/countdown.png.js ===
+// Vercel serverless function that renders a Sendtric-style PNG countdown
+// Usage: https://<your-vercel-app>.vercel.app/api/countdown.png?end=2025-12-31T23:59:59-05:00&label=Offer%20Ends%20Soon!&w=1200
 
-</body>
-</html>
+import { createCanvas, registerFont } from 'canvas';
+
+// Optional: register a bundled font if you add it (e.g., Inter-Regular.ttf)
+// registerFont("./fonts/Inter-SemiBold.ttf", { family: "Inter", weight: "600" });
+
+function parseNum(q, def) {
+  const n = Number(q);
+  return Number.isFinite(n) && n > 0 ? n : def;
+}
+
+function pad2(n) { return String(Math.max(0, Math.floor(n))).padStart(2, '0'); }
+
+export default async function handler(req, res) {
+  try {
+    const { searchParams } = new URL(req.url, 'http://x');
+    const endParam = searchParams.get('end');
+    const label = (searchParams.get('label') || 'Offer Ends Soon!').slice(0, 60);
+    const theme = (searchParams.get('theme') || 'dark').toLowerCase();
+    const w = parseNum(searchParams.get('w'), 1200);
+    const h = parseNum(searchParams.get('h'), 300);
+
+    // Colors
+    const colors = theme === 'light' ? {
+      bg: searchParams.get('bg') || '#f8fafc',
+      panel: '#ffffff',
+      text: '#111827',
+      muted: '#6b7280',
+      ring: '#e5e7eb',
+      accent: searchParams.get('accent') || '#7c3aed',
+    } : {
+      bg: searchParams.get('bg') || '#0b0f1a',
+      panel: '#0f172a',
+      text: '#ffffff',
+      muted: '#94a3b8',
+      ring: '#1f2937',
+      accent: searchParams.get('accent') || '#22d3ee',
+    };
+
+    const endMs = Date.parse(endParam || '2025-12-31T23:59:59-05:00');
+    const now = Date.now();
+    let diff = Math.max(0, endMs - now);
+    const days = Math.floor(diff / 86400000); diff -= days * 86400000;
+    const hours = Math.floor(diff / 3600000); diff -= hours * 3600000;
+    const mins = Math.floor(diff / 60000); diff -= mins * 60000;
+    const secs = Math.floor(diff / 1000);
+
+    const canvas = createCanvas(w, h);
+    const ctx = canvas.getContext('2d');
+
+    // Helpers
+    const roundRect = (x, y, rw, rh, r) => {
+      const rr = Math.min(r, rw/2, rh/2);
+      ctx.beginPath();
+      ctx.moveTo(x+rr, y);
+      ctx.arcTo(x+rw, y, x+rw, y+rh, rr);
+      ctx.arcTo(x+rw, y+rh, x, y+rh, rr);
+      ctx.arcTo(x, y+rh, x, y, rr);
+      ctx.arcTo(x, y, x+rw, y, rr);
+      ctx.closePath();
+    };
+
+    // Background
+    ctx.fillStyle = colors.bg; ctx.fillRect(0, 0, w, h);
+
+    // Panel
+    const pad = Math.round(h * 0.08);
+    const panelR = Math.round(h * 0.12);
+    const panelX = pad, panelY = pad, panelW = w - pad*2, panelH = h - pad*2;
+    roundRect(panelX, panelY, panelW, panelH, panelR);
+    ctx.fillStyle = colors.panel; ctx.fill();
+
+    // Headline
+    ctx.fillStyle = colors.text;
+    ctx.font = `700 ${Math.round(h*0.13)}px Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'top';
+    ctx.fillText(label, w/2, panelY + Math.round(h*0.06));
+
+    // Timer layout
+    const gutterY = Math.round(h*0.18);
+    const timerY = panelY + gutterY;
+    const timerH = panelH - gutterY - Math.round(h*0.08);
+
+    const slots = 4; // DD:HH:MM:SS
+    const gap = Math.round(panelW * 0.015);
+    const totalGap = gap * (slots - 1);
+    const slotW = Math.floor((panelW - totalGap) / slots);
+
+    const labels = ['DAYS', 'HOURS', 'MINUTES', 'SECONDS'];
+    const values = [String(days), pad2(hours), pad2(mins), pad2(secs)];
+
+    for (let i = 0; i < slots; i++) {
+      const x = panelX + i * (slotW + gap);
+      // Box
+      const boxH = Math.floor(timerH * 0.68);
+      roundRect(x, timerY, slotW, boxH, Math.round(h*0.06));
+      ctx.fillStyle = colors.bg; ctx.fill();
+      ctx.lineWidth = 2; ctx.strokeStyle = colors.ring; ctx.stroke();
+
+      // Value
+      ctx.fillStyle = colors.text;
+      const val = values[i];
+      ctx.font = `800 ${Math.round(boxH*0.52)}px Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial`;
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText(val, x + slotW/2, timerY + boxH/2 + Math.round(boxH*0.02));
+
+      // Label
+      ctx.fillStyle = colors.muted;
+      ctx.font = `700 ${Math.round(timerH*0.16)}px Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial`;
+      ctx.textBaseline = 'top';
+      ctx.fillText(labels[i], x + slotW/2, timerY + boxH + Math.round(timerH*0.07));
+    }
+
+    // Accent line under headline
+    const lineY = panelY + Math.round(h*0.155);
+    ctx.strokeStyle = colors.accent;
+    ctx.lineWidth = Math.max(2, Math.round(h*0.008));
+    ctx.beginPath();
+    ctx.moveTo(panelX + Math.round(panelW*0.2), lineY);
+    ctx.lineTo(panelX + Math.round(panelW*0.8), lineY);
+    ctx.stroke();
+
+    // Headers to prevent caching so emails stay live
+    res.setHeader('Content-Type', 'image/png');
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+
+    const png = canvas.toBuffer('image/png');
+    res.status(200).send(png);
+  } catch (err) {
+    res.status(400).send(`Error: ${err?.message || err}`);
+  }
+}
