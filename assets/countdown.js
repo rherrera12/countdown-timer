@@ -1,4 +1,3 @@
-<script>
 (function () {
   function pad2(n){return String(Math.max(0,Math.floor(n))).padStart(2,'0');}
   function setDigits(el, val) {
@@ -18,20 +17,19 @@
   }
 
   function initOne(root){
-    const end = root.dataset.end;                   // ISO 8601 with TZ recommended
+    const end = root.dataset.end;
     const theme = (root.dataset.theme||'dark').toLowerCase();
     const headline = root.dataset.headline || 'Offer Ends Soon!';
     const sub = root.dataset.sub || '';
-    const showCta = root.dataset.link === 'true';   // default no click
+    const showCta = root.dataset.link === 'true';
     const url = root.dataset.url || '#';
-    const width = parseInt(root.dataset.width||'600',10); // style width for email-like look
+    const width = parseInt(root.dataset.width||'600',10);
 
     let endMs = Date.parse(end);
-    if (Number.isNaN(endMs)) { // local date fallback
+    if (Number.isNaN(endMs)) {
       const maybe = new Date(end); if (!isNaN(maybe)) endMs = maybe.getTime();
     }
 
-    // Build DOM
     const wrap = document.createElement('div'); wrap.className = 'pf-countdown-wrap ' + (theme==='light'?'pf-countdown--light':'');
     const h = document.createElement('div'); h.className='pf-countdown-headline'; h.textContent=headline;
     const p = document.createElement('div'); p.className='pf-countdown-sub'; p.textContent=sub;
@@ -62,7 +60,6 @@
     wrap.appendChild(panel);
     root.innerHTML = ''; root.appendChild(wrap);
 
-    // tick
     const elDD = dd.querySelector('.pf-countdown-digits');
     const elHH = hh.querySelector('.pf-countdown-digits');
     const elMM = mm.querySelector('.pf-countdown-digits');
@@ -75,7 +72,6 @@
       const h = Math.floor(diff/3600000);  diff -= h*3600000;
       const m = Math.floor(diff/60000);    diff -= m*60000;
       const s = Math.floor(diff/1000);
-      // days can be >99 → expand to 3 digits if needed
       if (d > 99 && elDD.children.length === 2) elDD.innerHTML = '<span>0</span><span>0</span><span>0</span>';
       const dayStr = String(d).padStart(elDD.children.length,'0');
       [...elDD.children].forEach((sp,i)=>{ if (sp.textContent !== dayStr[i]) { sp.textContent=dayStr[i]; elDD.classList.add('pf-flip'); }});
@@ -89,4 +85,3 @@
     document.querySelectorAll('[data-countdown="pf"]').forEach(initOne);
   });
 })();
-</script>
