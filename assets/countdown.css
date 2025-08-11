@@ -1,45 +1,102 @@
-/* Minimal, sharp, email-banner style */
+/* Responsive, email-banner style countdown (light/dark capable) */
+
 .pf-countdown-wrap {
   font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial;
-  display: grid; gap: 10px; justify-items: center; text-align: center;
+  display: grid;
+  gap: 10px;
+  justify-items: center;
+  text-align: center;
+  width: 100%;
 }
-.pf-countdown-headline {
-  font-weight: 800; line-height: 1.1; color: #111827;
-}
-.pf-countdown-sub { color: #6b7280; font-weight: 600; }
+
+/* Panel scales fluidly; cap width for desktop polish */
 .pf-countdown-panel {
-  background: #0f172a; color: #fff; border-radius: 20px;
-  padding: 18px 22px; border: 1px solid rgba(255,255,255,.08);
-  box-shadow: 0 10px 30px rgba(0,0,0,.35);
-  display: grid; gap: 12px; justify-items: center;
-  width: min(960px, 96vw);
+  background: #ffffff;              /* light theme base (overridden by .pf-countdown--light/dark) */
+  color: #111827;
+  border-radius: 20px;
+  padding: 18px 22px;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 10px 30px rgba(0,0,0,.08);
+  display: grid;
+  gap: 12px;
+  justify-items: center;
+
+  /* Fluid width with a reasonable cap */
+  width: min(640px, 92vw);
 }
+
+/* Timer row */
 .pf-countdown-timer {
-  display: grid; grid-auto-flow: column; gap: 12px; align-items: end;
+  display: grid;
+  grid-auto-flow: column;
+  gap: clamp(8px, 2.2vw, 16px);
+  align-items: end;
 }
-.pf-countdown-slot { display: grid; gap: 6px; justify-items: center; min-width: 120px; }
+
+/* Each time unit */
+.pf-countdown-slot {
+  display: grid;
+  gap: 6px;
+  justify-items: center;
+  min-width: clamp(88px, 24vw, 140px);
+}
+
+/* The number boxes */
 .pf-countdown-digits {
-  display: grid; grid-template-columns: repeat(2,1fr); gap: 8px;
-  padding: 12px 16px; background: #0b1220; border-radius: 14px;
-  border: 1px solid rgba(255,255,255,.1); font-weight: 800;
-  font-feature-settings: "tnum" 1, "lnum" 1; font-size: 48px;
-  box-shadow: inset 0 -6px 18px rgba(0,0,0,.35);
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  padding: clamp(10px, 1.8vw, 16px);
+  background: #f3f4f6;
+  border-radius: 14px;
+  border: 1px solid #e5e7eb;
+  font-weight: 800;
+  font-feature-settings: "tnum" 1, "lnum" 1;
+  font-size: clamp(26px, 8vw, 48px);
+  box-shadow: inset 0 -6px 18px rgba(0,0,0,.06);
 }
-.pf-countdown-label { color: #94a3b8; font-size: 12px; letter-spacing: .12em; text-transform: uppercase; font-weight: 700; }
 
-.pf-countdown-sep { align-self: center; color: #9ca3af; font-size: 42px; font-weight: 800; padding: 0 4px 8px; }
-.pf-countdown-cta { display: none; } /* no click by default */
+/* Labels under boxes */
+.pf-countdown-label {
+  color: #6b7280;
+  font-size: clamp(10px, 2.5vw, 12px);
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  font-weight: 700;
+}
 
-.pf-countdown--light .pf-countdown-panel { background: #ffffff; color: #111827; }
-.pf-countdown--light .pf-countdown-digits { background: #f3f4f6; border-color: #e5e7eb; }
-.pf-countdown--light .pf-countdown-label { color: #6b7280; }
-.pf-countdown--light .pf-countdown-sep { color: #6b7280; }
+/* Colons */
+.pf-countdown-sep {
+  align-self: center;
+  color: #6b7280;
+  font-size: clamp(24px, 8vw, 42px);
+  font-weight: 800;
+  padding: 0 4px 8px;
+}
 
+/* Light/Dark theme toggles */
+.pf-countdown--light .pf-countdown-panel { background:#fff; color:#111827; }
+.pf-countdown--light .pf-countdown-digits { background:#f3f4f6; border-color:#e5e7eb; }
+.pf-countdown--light .pf-countdown-label { color:#6b7280; }
+.pf-countdown--light .pf-countdown-sep { color:#6b7280; }
+
+.pf-countdown--dark .pf-countdown-panel { background:#0f172a; color:#fff; border-color: rgba(255,255,255,.08); }
+.pf-countdown--dark .pf-countdown-digits { background:#0b1220; border-color: rgba(255,255,255,.1); color:#fff; }
+.pf-countdown--dark .pf-countdown-label { color:#94a3b8; }
+.pf-countdown--dark .pf-countdown-sep { color:#9ca3af; }
+
+/* Mobile: stack vertically; hide separators */
 @media (max-width: 560px) {
   .pf-countdown-timer { grid-auto-flow: row; }
   .pf-countdown-sep { display: none; }
   .pf-countdown-slot { min-width: 100%; }
-  .pf-countdown-digits { grid-template-columns: repeat(4,1fr); font-size: 38px; }
+  .pf-countdown-digits { grid-template-columns: repeat(2, 1fr); }
 }
+
+/* Flip micro-animation on value change */
 .pf-flip { animation: pfFlip .45s ease; }
-@keyframes pfFlip { 0%{transform:rotateX(0)}50%{transform:rotateX(10deg) scale(1.02)}100%{transform:rotateX(0)} }
+@keyframes pfFlip {
+  0% { transform: rotateX(0) }
+  50% { transform: rotateX(10deg) scale(1.02) }
+  100% { transform: rotateX(0) }
+}
