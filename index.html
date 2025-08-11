@@ -7,127 +7,56 @@
   <meta http-equiv="Expires" content="0" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Countdown Timer</title>
+
+  <link rel="stylesheet" href="assets/countdown.css" />
+  <!-- Planet Fitness accents (kept very simple to preserve symmetry) -->
   <style>
-    /* ====== Base, Planet Fitness accents, and responsive layout ====== */
-    :root { --pf-purple:#5F259F; --pf-yellow:#FFDE00; --gray:#6b7280; --panel:#fff; --text:#111827; }
-    body{margin:0;background:#fff;padding:40px 0;font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Arial}
-    .pf-wrap{display:grid;gap:10px;justify-items:center;text-align:center;width:100%}
-    .pf-head{font-weight:800;font-size:clamp(22px,4vw,28px);line-height:1.1}
-    .pf-sub{color:var(--gray);font-weight:600;font-size:clamp(12px,2.8vw,14px)}
-    .pf-panel{
-      background:var(--panel);color:var(--text);border-radius:20px;padding:18px 22px;border:1px solid #e5e7eb;
-      box-shadow:0 10px 30px rgba(0,0,0,.08);display:grid;gap:12px;justify-items:center;
-      width:min(720px,94vw); border-top:6px solid var(--pf-purple);
+    :root {
+      --pf-purple: #5F259F;
+      --pf-yellow: #FFDE00;
     }
-    .pf-timer{display:grid;grid-auto-flow:column;gap:clamp(8px,2.2vw,16px);align-items:end}
-    .pf-slot{display:grid;gap:6px;justify-items:center;min-width:clamp(80px,22vw,150px)}
-    .pf-digits{
-      display:grid;grid-template-columns:repeat(2,1fr);gap:clamp(6px,1.5vw,10px);
-      padding:clamp(10px,1.8vw,16px);background:var(--pf-purple);border-radius:14px;border:1px solid var(--pf-purple);
-      font-weight:800;font-feature-settings:"tnum" 1,"lnum" 1;font-size:clamp(24px,7.5vw,48px);
-      color:var(--pf-yellow); box-shadow:inset 0 -6px 18px rgba(0,0,0,.06)
+    .cd .value {
+      background: var(--pf-purple);
+      color: var(--pf-yellow);
+      border-color: var(--pf-purple);
     }
-    .pf-label{color:var(--pf-purple);font-size:clamp(10px,2.5vw,12px);letter-spacing:.12em;text-transform:uppercase;font-weight:700}
-    .pf-sep{align-self:center;color:var(--pf-purple);font-size:clamp(24px,7.2vw,42px);font-weight:800;padding:0 4px 8px}
-    .pf-flip{animation:pfFlip .45s ease}
-    @keyframes pfFlip{0%{transform:rotateX(0)}50%{transform:rotateX(10deg) scale(1.02)}100%{transform:rotateX(0)}}
-
-    /* Stack on phones */
-    @media (max-width:560px){
-      .pf-timer{grid-auto-flow:row}
-      .pf-sep{display:none}
-      .pf-slot{min-width:100%}
-      .pf-digits{font-size:clamp(22px,8vw,36px)}
+    .cd .label, .cd .sep {
+      color: var(--pf-purple);
     }
-
-    /* Tight & extra-tight modes (applied by JS on load/resize) */
-    .pf-tight .pf-digits{font-size:clamp(20px,7vw,32px);padding:clamp(8px,1.4vw,12px)}
-    .pf-tight .pf-slot{min-width:clamp(68px,20vw,120px)}
-    .pf-x-tight .pf-digits{font-size:clamp(18px,6.5vw,28px);padding:clamp(6px,1.2vw,10px)}
-    .pf-x-tight .pf-slot{min-width:clamp(60px,18vw,110px)}
-    .pf-x-tight .pf-label,.pf-x-tight .pf-sep{display:none}
+    .cd .panel { border-top: 6px solid var(--pf-purple); }
   </style>
 </head>
 <body>
-  <div id="root"
-       data-end="2025-12-31T23:59:59-05:00"
-       data-headline="Offer Ends Soon!"
-       data-sub="Enrollment ends tonight">
-  </div>
 
-  <script>
-    (function(){
-      // Helpers
-      function lpad2(n){var s=String(Math.max(0,Math.floor(n)));return s.length<2?'0'+s:s;}
-      function setDigits(el,val){
-        var s=lpad2(val),sp=el.querySelectorAll('span');
-        if(sp[0].textContent!==s.charAt(0)){sp[0].textContent=s.charAt(0);el.classList.add('pf-flip');}
-        if(sp[1].textContent!==s.charAt(1)){sp[1].textContent=s.charAt(1);el.classList.add('pf-flip');}
-        setTimeout(function(){el.classList.remove('pf-flip');},260);
-      }
-      function buildSlot(label,id){
-        var slot=document.createElement('div');slot.className='pf-slot';
-        var digits=document.createElement('div');digits.className='pf-digits';digits.id=id;digits.innerHTML='<span>0</span><span>0</span>';
-        var lab=document.createElement('div');lab.className='pf-label';lab.textContent=label;
-        slot.appendChild(digits);slot.appendChild(lab);return slot;
-      }
-      function applyTightModes(panel, dd){
-        var w=panel.clientWidth, daysDigits=dd.children.length; // 2 or 3
-        var tight=(w<420)||(daysDigits>2&&w<520);
-        var xtight=(w<340)||(daysDigits>2&&w<420);
-        panel.classList.toggle('pf-tight', tight && !xtight);
-        panel.classList.toggle('pf-x-tight', xtight);
-        if(!tight&&!xtight){panel.classList.remove('pf-tight');panel.classList.remove('pf-x-tight');}
-      }
+  <main class="cd">
+    <h1 class="headline">Offer Ends Soon!</h1>
+    <p class="sub">Enrollment ends tonight</p>
 
-      // Init
-      var root=document.getElementById('root');
-      var endStr=root.getAttribute('data-end');
-      var headline=root.getAttribute('data-headline')||'Offer Ends Soon!';
-      var sub=root.getAttribute('data-sub')||'';
-      var endMs=Date.parse(endStr); if(isNaN(endMs)){var maybe=new Date(endStr);if(!isNaN(maybe))endMs=maybe.getTime();}
+    <section class="panel" aria-live="polite">
+      <div class="units" id="cd-units">
+        <div class="unit" aria-label="Days">
+          <div class="value" id="cd-days"><span>0</span><span>0</span></div>
+          <div class="label">DAYS</div>
+        </div>
+        <div class="sep">:</div>
+        <div class="unit" aria-label="Hours">
+          <div class="value" id="cd-hours"><span>0</span><span>0</span></div>
+          <div class="label">HOURS</div>
+        </div>
+        <div class="sep">:</div>
+        <div class="unit" aria-label="Minutes">
+          <div class="value" id="cd-mins"><span>0</span><span>0</span></div>
+          <div class="label">MINUTES</div>
+        </div>
+        <div class="sep">:</div>
+        <div class="unit" aria-label="Seconds">
+          <div class="value" id="cd-secs"><span>0</span><span>0</span></div>
+          <div class="label">SECONDS</div>
+        </div>
+      </div>
+    </section>
+  </main>
 
-      // Build DOM
-      var wrap=document.createElement('div');wrap.className='pf-wrap';
-      var h=document.createElement('div');h.className='pf-head';h.textContent=headline;wrap.appendChild(h);
-      if(sub){var p=document.createElement('div');p.className='pf-sub';p.textContent=sub;wrap.appendChild(p);}
-      var panel=document.createElement('div');panel.className='pf-panel';
-      var timer=document.createElement('div');timer.className='pf-timer';
-
-      function sep(){var s=document.createElement('div');s.className='pf-sep';s.textContent=':';return s;}
-      var dd=buildSlot('DAYS','pf-dd'), hh=buildSlot('HOURS','pf-hh'), mm=buildSlot('MINUTES','pf-mm'), ss=buildSlot('SECONDS','pf-ss');
-      timer.appendChild(dd);timer.appendChild(sep());timer.appendChild(hh);timer.appendChild(sep());timer.appendChild(mm);timer.appendChild(sep());timer.appendChild(ss);
-      panel.appendChild(timer);wrap.appendChild(panel);root.replaceWith(wrap);
-
-      var elDD=dd.querySelector('.pf-digits'), elHH=hh.querySelector('.pf-digits'), elMM=mm.querySelector('.pf-digits'), elSS=ss.querySelector('.pf-digits');
-
-      function tick(){
-        var now=Date.now(), diff=endMs-now;
-        if(diff<=0){setDigits(elDD,0);setDigits(elHH,0);setDigits(elMM,0);setDigits(elSS,0);return;}
-        var d=Math.floor(diff/86400000); diff-=d*86400000;
-        var h=Math.floor(diff/3600000);  diff-=h*3600000;
-        var m=Math.floor(diff/60000);    diff-=m*60000;
-        var s=Math.floor(diff/1000);
-
-        // Expand to 3-digit days if needed
-        if(d>99 && elDD.children.length===2){elDD.innerHTML='<span>0</span><span>0</span><span>0</span>';}
-
-        // Update day digits (handles 2 or 3)
-        var dayStr=String(d); while(dayStr.length<elDD.children.length) dayStr='0'+dayStr;
-        for(var i=0;i<elDD.children.length;i++){var sp=elDD.children[i]; if(sp.textContent!==dayStr.charAt(i)){sp.textContent=dayStr.charAt(i);elDD.classList.add('pf-flip');}}
-        setTimeout(function(){elDD.classList.remove('pf-flip');},260);
-
-        setDigits(elHH,h); setDigits(elMM,m); setDigits(elSS,s);
-
-        // Prevent overflow on each tick (and on resize)
-        applyTightModes(panel, elDD);
-      }
-
-      // First paint, then start ticking and listen to resizes
-      tick();
-      var iv=setInterval(function(){ tick(); if(Date.now()>=endMs) clearInterval(iv); },1000);
-      window.addEventListener('resize', function(){ applyTightModes(panel, elDD); });
-    })();
-  </script>
+  <script src="assets/countdown.js" defer></script>
 </body>
 </html>
